@@ -2,6 +2,7 @@ import App
 import Vapor
 import PostgreSQLProvider
 
+
 /// We have isolated all of our App's logic into
 /// the App module because it makes our app
 /// more testable.
@@ -24,5 +25,11 @@ try config.addProvider(PostgreSQLProvider.Provider.self)
 let drop = try Droplet(config)
 
 try drop.setup()
+
+drop.get("aceitunas"){_ in
+    return "aceitunas"
+}
+
+
 
 try drop.run()
