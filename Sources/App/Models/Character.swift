@@ -11,12 +11,13 @@ import PostgreSQLProvider
 
 final class Character: Model {
     var storage: Storage = Storage()
+    var id: Node?
     var name: String?
     var description: String?
     var image: String?
     var formalDescription: String {
         get {
-            return "\(name) - \(description ?? "No description provided.")"
+            return "\(name!) - \(description ?? "No description provided.")"
         }
     }
 
@@ -61,16 +62,44 @@ extension Character: Preparation {
     }
 }
 
-extension Character: NodeRepresentable{
 
 
-         func makeNode(in context: Context?) throws -> Node {
-            return try Node(node: ["name": self.name,
-                                   "description": self.description,
-                                   "image": self.image])
-        }
+extension Character: NodeRepresentable {
+
+
+    func makeNode(in context: Context?) throws -> Node {
+        // model won't always have value to allow proper merges,
+        // database defaults to false
+        return try Node.init(node:
+            [
+                "id": id,
+                "name": name,
+                "image": image,
+                "description": description,
+            ]
+        )
+    }
+
 
 }
+
+
+extension Character: JSONConvertible{
+    convenience init(json: JSON) throws {
+        self.init(name: try json.get("name"), description: try json.get("description"), image: try json.get("image"))
+    }
+
+    func makeJSON() throws -> JSON {
+        var json = JSON()
+        try json.set("id", assertExists())
+        try json.set("name", name)
+        try json.set("description", description)
+        try json.set("formalDescription", formalDescription)
+        try json.set("image", image)
+        return json
+    }
+}
+
 
 
 extension Character{
